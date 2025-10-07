@@ -6,3 +6,5 @@ services:
         NODE_ENV: development
     environment:
       NODE_ENV: development
+    env_file:
+      - ../.env.local
