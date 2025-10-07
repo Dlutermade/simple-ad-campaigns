@@ -1,0 +1,8 @@
+services:
+  app:
+    profiles: ["local"]
+    build:
+      args:
+        NODE_ENV: development
+    environment:
+      NODE_ENV: development

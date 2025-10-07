@@ -1,6 +1,9 @@
 import tsconfigPaths from 'vite-tsconfig-paths';
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
+import { loadEnvFile } from 'process';
+
+loadEnvFile('.env.e2e');
 
 export default defineConfig({
   test: {
