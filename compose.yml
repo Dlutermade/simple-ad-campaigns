@@ -3,3 +3,4 @@ include:
     - ./docker/compose.base.yml
     - ./docker/compose.local.yml
     - ./docker/compose.e2e.yml
+    - ./docker/compose.dev.yml

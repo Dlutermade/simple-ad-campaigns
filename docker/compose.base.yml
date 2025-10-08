@@ -16,6 +16,7 @@ services:
       - db
 
   db:
+    profiles: ["local"]
     image: postgres:18
     environment:
       POSTGRES_USER: user
@@ -23,6 +24,8 @@ services:
       POSTGRES_DB: local
     ports:
       - "5432:5432"
+    networks:
+      - default
 
 networks:
   default:

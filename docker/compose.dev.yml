@@ -1,0 +1,10 @@
+services:
+  db:
+    profiles: ["dev"]
+    image: postgres:18
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dev
+    ports:
+      - "5432:5432"
