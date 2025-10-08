@@ -20,8 +20,11 @@ describe('AppController (e2e)', () => {
     console.log(process.env);
 
     return request(app.getHttpServer())
-      .get('/')
+      .get('/campaigns')
       .expect(200)
-      .expect('Hello World!');
+      .expect(({ body }) => {
+        expect(body).toHaveProperty('list');
+        expect(body).toHaveProperty('count');
+      });
   });
 });

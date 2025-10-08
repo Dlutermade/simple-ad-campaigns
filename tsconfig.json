@@ -18,8 +18,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@src/*": ["src/*"],
-      "@db/*": ["db/*"]
+      "@src/*": ["src/*"]
     }
   }
 }
