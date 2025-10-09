@@ -2,11 +2,11 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ApiNotFoundResponse, ApiResponse } from '@nestjs/swagger';
 import { FindAllCampaignsQuery, FindCampaignByIdQuery } from '../queries';
-import { GetAllCampaignsRequest } from '../requestDtos';
 import {
+  GetAllCampaignsRequest,
   GetAllCampaignsResponse,
   GetCampaignByIdResponse,
-} from '../responseDtos';
+} from '../dtos';
 
 @Controller('campaigns')
 export class CampaignController {

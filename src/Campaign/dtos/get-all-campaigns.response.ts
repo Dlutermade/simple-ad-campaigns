@@ -177,7 +177,7 @@ class Campaign {
   }
 }
 
-export class GetAllCampaignsRequest {
+class GetAllCampaignsQuery {
   @ApiPropertyOptional({
     type: 'number',
     example: 10,
@@ -216,9 +216,9 @@ export class GetAllCampaignsResponse {
     example: { take: 10, skip: 0 },
     description: 'The query parameters used for fetching campaigns',
   })
-  public readonly query: GetAllCampaignsRequest;
+  public readonly query: GetAllCampaignsQuery;
 
-  constructor(list: Campaign[], count: number, query: GetAllCampaignsRequest) {
+  constructor(list: Campaign[], count: number, query: GetAllCampaignsQuery) {
     this.list = list;
     this.count = count;
     this.query = query;
