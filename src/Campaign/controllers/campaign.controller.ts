@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiNotFoundResponse, ApiResponse } from '@nestjs/swagger';
 import {
   FindAllCampaignsQuery,
@@ -8,14 +8,19 @@ import {
   FindCampaignByIdResult,
 } from '../queries';
 import {
+  CreateCampaignRequest,
   GetAllCampaignsRequest,
   GetAllCampaignsResponse,
   GetCampaignByIdResponse,
 } from '../dtos';
+import { CreateCampaignCommand } from '../commands';
 
 @Controller('campaigns')
 export class CampaignController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @ApiResponse({
     status: 200,
@@ -46,5 +51,11 @@ export class CampaignController {
     return this.queryBus.execute<FindCampaignByIdQuery, FindCampaignByIdResult>(
       query,
     );
+  }
+
+  @Post()
+  createCampaign(@Body() body: CreateCampaignRequest) {
+    const command = new CreateCampaignCommand(body.name, body.budget);
+    return this.commandBus.execute<CreateCampaignCommand>(command);
   }
 }
