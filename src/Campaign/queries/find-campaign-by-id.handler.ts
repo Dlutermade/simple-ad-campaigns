@@ -1,9 +1,6 @@
 import { Inject, Logger, NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import {
-  DRIZZLE_PROVIDER,
-  DrizzleProviderType,
-} from '@src/libs/drizzle.module';
+import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import { FindCampaignByIdQuery } from './find-campaign-by-id.query';
 import { FindCampaignByIdResult } from './find-campaign-by-id.result';
 
@@ -13,7 +10,7 @@ export class FindCampaignByIdHandler
 {
   constructor(
     @Inject(DRIZZLE_PROVIDER)
-    private readonly db: DrizzleProviderType,
+    private readonly db: PgDatabase,
   ) {}
 
   private readonly logger = new Logger(FindCampaignByIdHandler.name);

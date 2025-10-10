@@ -6,7 +6,7 @@ import * as schema from '@src/db/schema';
 
 export const DRIZZLE_PROVIDER = Symbol('DRIZZLE_PROVIDER');
 
-export type DrizzleProviderType = NodePgDatabase<typeof schema>;
+export type PgDatabase = NodePgDatabase<typeof schema>;
 
 @Global()
 @Module({

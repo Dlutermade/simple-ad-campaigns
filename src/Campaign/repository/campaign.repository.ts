@@ -1,15 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { campaignsTable } from '@src/db/schema';
-import {
-  DRIZZLE_PROVIDER,
-  DrizzleProviderType,
-} from '@src/libs/drizzle.module';
+import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
+import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class CampaignRepository {
-  constructor(
-    @Inject(DRIZZLE_PROVIDER) private readonly db: DrizzleProviderType,
-  ) {}
+  constructor(@Inject(DRIZZLE_PROVIDER) private readonly db: PgDatabase) {}
 
   private readonly Logger = new Logger(CampaignRepository.name);
 
@@ -30,5 +26,17 @@ export class CampaignRepository {
     this.Logger.log('Campaign created', campaign);
 
     return campaign;
+  }
+
+  async findById(id: string) {
+    this.Logger.log(`Finding campaign by id: ${id}`);
+
+    const sql = this.db
+      .select()
+      .from(campaignsTable)
+      .for('update')
+      .where(eq(campaignsTable.id, id));
+
+    this.Logger.log('Campaign found', campaign);
   }
 }

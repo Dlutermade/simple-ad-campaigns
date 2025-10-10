@@ -1,9 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { FindAllCampaignsQuery } from './find-all-campaigns.query';
-import {
-  DRIZZLE_PROVIDER,
-  DrizzleProviderType,
-} from '@src/libs/drizzle.module';
+import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import { Inject, Logger } from '@nestjs/common';
 import { campaignsTable } from '@src/db/schema';
 import { FindAllCampaignsResult } from './find-all-campaigns.result';
@@ -14,7 +11,7 @@ export class FindAllCampaignsHandler
 {
   constructor(
     @Inject(DRIZZLE_PROVIDER)
-    private readonly db: DrizzleProviderType,
+    private readonly db: PgDatabase,
   ) {}
 
   private readonly logger = new Logger(FindAllCampaignsHandler.name);
