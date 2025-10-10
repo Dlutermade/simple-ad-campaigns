@@ -53,6 +53,11 @@ export class CampaignController {
     );
   }
 
+  @ApiResponse({
+    status: 201,
+    description: 'Campaign created successfully',
+    type: GetCampaignByIdResponse,
+  })
   @Post()
   createCampaign(@Body() body: CreateCampaignRequest) {
     const command = new CreateCampaignCommand(body.name, body.budget);
