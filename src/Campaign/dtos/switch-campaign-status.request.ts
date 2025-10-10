@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class SwitchCampaignStatusRequest {
   @ApiProperty({
@@ -7,6 +8,8 @@ export class SwitchCampaignStatusRequest {
     description: 'New status for the campaign',
     example: 'Active',
   })
+  @IsEnum(['Paused', 'Active'])
+  @IsNotEmpty()
   public readonly status: 'Paused' | 'Active';
 
   @ApiProperty({
@@ -14,5 +17,7 @@ export class SwitchCampaignStatusRequest {
     description: 'Version number for optimistic concurrency control',
     example: 1,
   })
+  @IsNumber()
+  @IsNotEmpty()
   public readonly version: number;
 }

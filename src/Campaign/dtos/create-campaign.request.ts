@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateCampaignRequest {
   @ApiProperty({
@@ -15,6 +15,7 @@ export class CreateCampaignRequest {
     example: 100000,
   })
   @IsNumber()
+  @IsInt()
   @IsNotEmpty()
   @Min(0)
   public readonly budget: number;

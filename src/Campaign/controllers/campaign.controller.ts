@@ -16,12 +16,16 @@ import {
   FindCampaignByIdResult,
 } from '../queries';
 import {
+  AdjustCampaignBudgetCommand,
+  AdjustCampaignBudgetResult,
   CreateCampaignCommand,
   CreateCampaignResult,
   SwitchCampaignStatusCommand,
   SwitchCampaignStatusResult,
 } from '../commands';
 import {
+  AdjustCampaignBudgetRequest,
+  AdjustCampaignBudgetResponse,
   CreateCampaignRequest,
   CreateCampaignResponse,
   GetAllCampaignsRequest,
@@ -100,6 +104,27 @@ export class CampaignController {
     return this.commandBus.execute<
       SwitchCampaignStatusCommand,
       SwitchCampaignStatusResult
+    >(command);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign budget adjusted successfully',
+    type: AdjustCampaignBudgetResponse,
+  })
+  @Patch(':id/budget')
+  adjustBudget(
+    @Param('id') id: string,
+    @Body() body: AdjustCampaignBudgetRequest,
+  ) {
+    const command = new AdjustCampaignBudgetCommand(
+      id,
+      body.adjustAmount,
+      body.version,
+    );
+    return this.commandBus.execute<
+      AdjustCampaignBudgetCommand,
+      AdjustCampaignBudgetResult
     >(command);
   }
 }

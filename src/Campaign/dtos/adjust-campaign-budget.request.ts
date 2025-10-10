@@ -1,14 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateCampaignRequest {
+export class AdjustCampaignBudgetRequest {
   @ApiProperty({
-    description: 'Name of the campaign',
-    example: 'Summer Sale Campaign',
+    description: 'Budget of the campaign in cents',
+    example: 100000,
   })
-  @IsString()
+  @IsNumber()
+  @IsInt()
   @IsNotEmpty()
-  public readonly name: string;
+  public readonly adjustAmount: number;
 
   @ApiProperty({
     type: Number,
