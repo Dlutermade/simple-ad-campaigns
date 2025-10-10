@@ -30,7 +30,7 @@ export class SwitchCampaignStatusHandler
   ): Promise<SwitchCampaignStatusResult> {
     this.logger.log('Switching campaign status...', command);
 
-    const updatedCampaign = await this.db.transaction(async (tx) => {
+    const result = await this.db.transaction(async (tx) => {
       this.logger.log('Transaction started for switching campaign status.');
 
       const campaign = await this.campaignRepository
@@ -153,7 +153,7 @@ export class SwitchCampaignStatusHandler
         }
       }
 
-      return this.campaignRepository.update(
+      const updatedCampaign = await this.campaignRepository.update(
         command.id,
         {
           status: command.status,
@@ -163,20 +163,25 @@ export class SwitchCampaignStatusHandler
           txClient: tx,
         },
       );
+
+      this.logger.log(
+        'Campaign status switched successfully.',
+        updatedCampaign,
+      );
+
+      if (!updatedCampaign) {
+        this.logger.error(
+          `campaign version mismatch: Campaign with id ${command.id} was not found after successful transaction.`,
+        );
+        throw new ConflictException({
+          errorCode: 'CAMPAIGN_VERSION_MISMATCH_AFTER_UPDATE',
+          id: command.id,
+        });
+      }
+
+      return updatedCampaign;
     });
 
-    this.logger.log('Campaign status switched successfully.', updatedCampaign);
-
-    if (!updatedCampaign) {
-      this.logger.error(
-        `campaign version mismatch: Campaign with id ${command.id} was not found after successful transaction.`,
-      );
-      throw new ConflictException({
-        errorCode: 'CAMPAIGN_VERSION_MISMATCH_AFTER_UPDATE',
-        id: command.id,
-      });
-    }
-
-    return updatedCampaign;
+    return result;
   }
 }
