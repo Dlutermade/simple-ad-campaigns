@@ -169,10 +169,10 @@ export class SwitchCampaignStatusHandler
 
     if (!updatedCampaign) {
       this.logger.error(
-        `Unexpected error: Campaign with id ${command.id} was not found after successful transaction.`,
+        `campaign version mismatch: Campaign with id ${command.id} was not found after successful transaction.`,
       );
-      throw new NotFoundException({
-        errorCode: 'CAMPAIGN_NOT_FOUND_AFTER_UPDATE',
+      throw new ConflictException({
+        errorCode: 'CAMPAIGN_VERSION_MISMATCH_AFTER_UPDATE',
         id: command.id,
       });
     }

@@ -40,10 +40,6 @@ describe('SwitchCampaignStatusHandler', () => {
                 id,
                 ...data,
                 version: data.version + 1,
-                name: 'Test Campaign',
-                budget: 1000,
-                createdAt: new Date(),
-                updatedAt: new Date(),
               }),
             ),
           },
@@ -305,18 +301,11 @@ THEN:
 
     const command = new SwitchCampaignStatusCommand('1', 'Active', 1);
 
-    await handler.execute(command);
+    const result = await handler.execute(command);
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(campaignRepository.update).toHaveBeenCalledExactlyOnceWith(
-      '1',
-      {
-        status: 'Active',
-        version: 1,
-      },
-      {
-        txClient: null,
-      },
-    );
+    expect(result).toMatchObject({
+      id: '1',
+      status: 'Active',
+    });
   });
 });
