@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiNotFoundResponse, ApiResponse } from '@nestjs/swagger';
 import {
@@ -7,13 +15,20 @@ import {
   FindCampaignByIdQuery,
   FindCampaignByIdResult,
 } from '../queries';
-import { CreateCampaignCommand, CreateCampaignResult } from '../commands';
+import {
+  CreateCampaignCommand,
+  CreateCampaignResult,
+  SwitchCampaignStatusCommand,
+  SwitchCampaignStatusResult,
+} from '../commands';
 import {
   CreateCampaignRequest,
   CreateCampaignResponse,
   GetAllCampaignsRequest,
   GetAllCampaignsResponse,
   GetCampaignByIdResponse,
+  SwitchCampaignStatusRequest,
+  SwitchCampaignStatusResponse,
 } from '../dtos';
 
 @Controller('campaigns')
@@ -65,5 +80,26 @@ export class CampaignController {
     return this.commandBus.execute<CreateCampaignCommand, CreateCampaignResult>(
       command,
     );
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign status switched successfully',
+    type: SwitchCampaignStatusResponse,
+  })
+  @Patch(':id/status')
+  switchStatus(
+    @Param('id') id: string,
+    @Body() body: SwitchCampaignStatusRequest,
+  ) {
+    const command = new SwitchCampaignStatusCommand(
+      id,
+      body.status,
+      body.version,
+    );
+    return this.commandBus.execute<
+      SwitchCampaignStatusCommand,
+      SwitchCampaignStatusResult
+    >(command);
   }
 }
