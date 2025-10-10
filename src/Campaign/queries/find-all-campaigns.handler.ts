@@ -6,10 +6,11 @@ import {
 } from '@src/libs/drizzle.module';
 import { Inject, Logger } from '@nestjs/common';
 import { campaignsTable } from '@src/db/schema';
+import { FindAllCampaignsResult } from './find-all-campaigns.result';
 
 @QueryHandler(FindAllCampaignsQuery)
 export class FindAllCampaignsHandler
-  implements IQueryHandler<FindAllCampaignsQuery>
+  implements IQueryHandler<FindAllCampaignsQuery, FindAllCampaignsResult>
 {
   constructor(
     @Inject(DRIZZLE_PROVIDER)
@@ -18,7 +19,7 @@ export class FindAllCampaignsHandler
 
   private readonly logger = new Logger(FindAllCampaignsHandler.name);
 
-  async execute(query: FindAllCampaignsQuery): Promise<any> {
+  async execute(query: FindAllCampaignsQuery) {
     this.logger.log('Executing FindAllCampaignsQuery', query);
 
     const [list, count] = await this.db.transaction(async (tx) => {

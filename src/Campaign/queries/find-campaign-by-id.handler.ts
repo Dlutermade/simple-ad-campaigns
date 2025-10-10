@@ -5,10 +5,11 @@ import {
   DrizzleProviderType,
 } from '@src/libs/drizzle.module';
 import { FindCampaignByIdQuery } from './find-campaign-by-id.query';
+import { FindCampaignByIdResult } from './find-campaign-by-id.result';
 
 @QueryHandler(FindCampaignByIdQuery)
 export class FindCampaignByIdHandler
-  implements IQueryHandler<FindCampaignByIdQuery>
+  implements IQueryHandler<FindCampaignByIdQuery, FindCampaignByIdResult>
 {
   constructor(
     @Inject(DRIZZLE_PROVIDER)
@@ -17,7 +18,7 @@ export class FindCampaignByIdHandler
 
   private readonly logger = new Logger(FindCampaignByIdHandler.name);
 
-  async execute(query: FindCampaignByIdQuery): Promise<any> {
+  async execute(query: FindCampaignByIdQuery) {
     this.logger.log('Executing FindCampaignByIdQuery', query);
 
     const campaign = await this.db.query.campaignsTable.findFirst({
@@ -38,6 +39,6 @@ export class FindCampaignByIdHandler
 
     this.logger.log(`Found campaign with id ${query.id}`);
 
-    return { campaign, query };
+    return campaign;
   }
 }

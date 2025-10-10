@@ -145,7 +145,7 @@ class Campaign {
     example: '2023-10-01T12:00:00Z',
     description: 'The creation timestamp of the campaign',
   })
-  public readonly createdAt: string;
+  public readonly createdAt: Date;
 
   @ApiProperty({
     type: 'string',
@@ -153,7 +153,7 @@ class Campaign {
     example: '2023-10-01T12:00:00Z',
     description: 'The last updated timestamp of the campaign',
   })
-  public readonly updatedAt: string;
+  public readonly updatedAt: Date;
 
   @ApiProperty({
     type: 'number',
