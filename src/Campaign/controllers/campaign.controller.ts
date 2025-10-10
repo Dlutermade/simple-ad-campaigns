@@ -22,6 +22,8 @@ import {
   CreateCampaignResult,
   SwitchCampaignStatusCommand,
   SwitchCampaignStatusResult,
+  UpdateCampaignCommand,
+  UpdateCampaignResult,
 } from '../commands';
 import {
   AdjustCampaignBudgetRequest,
@@ -33,6 +35,8 @@ import {
   GetCampaignByIdResponse,
   SwitchCampaignStatusRequest,
   SwitchCampaignStatusResponse,
+  UpdateCampaignRequest,
+  UpdateCampaignResponse,
 } from '../dtos';
 
 @Controller('campaigns')
@@ -126,5 +130,19 @@ export class CampaignController {
       AdjustCampaignBudgetCommand,
       AdjustCampaignBudgetResult
     >(command);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Campaign updated successfully',
+    type: UpdateCampaignResponse,
+  })
+  @Patch(':id')
+  updateCampaign(@Param('id') id: string, @Body() body: UpdateCampaignRequest) {
+    const command = new UpdateCampaignCommand(id, body.name, body.version);
+
+    return this.commandBus.execute<UpdateCampaignCommand, UpdateCampaignResult>(
+      command,
+    );
   }
 }
