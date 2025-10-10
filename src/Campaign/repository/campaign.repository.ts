@@ -1,7 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { campaignsTable } from '@src/db/schema';
-import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
-import { eq } from 'drizzle-orm';
+import {
+  DRIZZLE_PROVIDER,
+  PgDatabase,
+  PgTransactionClient,
+} from '@src/libs/drizzle.module';
+import { and, eq, sql } from 'drizzle-orm';
+import { LockConfig, LockStrength } from 'drizzle-orm/pg-core';
 
 @Injectable()
 export class CampaignRepository {
@@ -11,32 +16,100 @@ export class CampaignRepository {
 
   async createCampaign(
     data: Pick<typeof campaignsTable.$inferInsert, 'name' | 'budget'>,
+    options?: { txClient?: PgTransactionClient },
   ) {
-    this.Logger.log('Creating a new campaign', data);
+    try {
+      this.Logger.log('Creating a new campaign', data);
 
-    const [campaign] = await this.db
-      .insert(campaignsTable)
-      .values({
-        name: data.name,
-        budget: data.budget,
-        status: 'Paused',
-      })
-      .returning();
+      const dbClient = options?.txClient ?? this.db;
 
-    this.Logger.log('Campaign created', campaign);
+      const [campaign] = await dbClient
+        .insert(campaignsTable)
+        .values({
+          name: data.name,
+          budget: data.budget,
+          status: 'Paused',
+        })
+        .returning();
 
-    return campaign;
+      this.Logger.log('Campaign created', campaign);
+
+      return campaign;
+    } catch (error) {
+      this.Logger.error('Cannot create campaign', error);
+      throw error;
+    }
   }
 
-  async findById(id: string) {
-    this.Logger.log(`Finding campaign by id: ${id}`);
+  async findById(
+    id: string,
+    options?: {
+      txClient?: PgTransactionClient;
+      lock?: {
+        strength: LockStrength;
+        lockConfig?: LockConfig;
+      };
+    },
+  ): Promise<typeof campaignsTable.$inferSelect | undefined> {
+    try {
+      this.Logger.log(`Finding campaign by id: ${id}`);
 
-    const sql = this.db
-      .select()
-      .from(campaignsTable)
-      .for('update')
-      .where(eq(campaignsTable.id, id));
+      const dbClient = options?.txClient ?? this.db;
 
-    this.Logger.log('Campaign found', campaign);
+      const sql = dbClient
+        .select()
+        .from(campaignsTable)
+        .where(eq(campaignsTable.id, id));
+
+      const [campaign] = await (options?.lock
+        ? sql.for(options.lock.strength, options.lock.lockConfig)
+        : sql);
+
+      this.Logger.log(`Found campaign by id: ${id}`, campaign);
+
+      return campaign;
+    } catch (error) {
+      this.Logger.error(`Cannot find campaign by id: ${id}`, error);
+      throw error;
+    }
+  }
+
+  async update(
+    id: string,
+    data: Pick<typeof campaignsTable.$inferSelect, 'version'> &
+      Partial<
+        Pick<typeof campaignsTable.$inferSelect, 'name' | 'budget' | 'status'>
+      >,
+    options?: { txClient?: PgTransactionClient },
+  ): Promise<typeof campaignsTable.$inferSelect | undefined> {
+    try {
+      this.Logger.log(`Updating campaign id: ${id}`, data);
+
+      const dbClient = options?.txClient ?? this.db;
+
+      const [campaign] = await dbClient
+        .update(campaignsTable)
+        .set({
+          name: data.name,
+          budget: data.budget,
+          status: data.status,
+          version: sql`${campaignsTable.version} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(campaignsTable.id, id),
+            eq(campaignsTable.version, data.version),
+          ),
+        )
+        .returning();
+
+      this.Logger.log(`Updated campaign id: ${id}`, campaign);
+
+      return campaign;
+    } catch (error) {
+      this.Logger.error(`Cannot update campaign id: ${id}`, error);
+      throw error;
+    }
   }
 }
