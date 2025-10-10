@@ -15,7 +15,7 @@ export class CampaignRepository {
 
   async createCampaign(
     data: Pick<typeof campaignsTable.$inferInsert, 'name' | 'budget'>,
-  ): Promise<any> {
+  ) {
     this.Logger.log('Creating a new campaign', data);
 
     const [campaign] = await this.db

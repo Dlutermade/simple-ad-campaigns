@@ -15,12 +15,14 @@ describe('CreateCampaignHandler', () => {
         {
           provide: CampaignRepository,
           useValue: {
-            createCampaign: vitest.fn().mockImplementation((data) => ({
-              id: 1,
-              name: data.name,
-              budget: data.budget,
-              status: 'Paused',
-            })),
+            createCampaign: vitest
+              .fn()
+              .mockImplementation((data: { name: string; budget: number }) => ({
+                id: 1,
+                name: data.name,
+                budget: data.budget,
+                status: 'Paused',
+              })),
           },
         },
       ],
@@ -45,10 +47,8 @@ describe('CreateCampaignHandler', () => {
 
     const result = await handler.execute(command);
 
-    expect(repository.createCampaign).toHaveBeenCalledWith({
-      name: command.name,
-      budget: command.budget,
-    });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(repository.createCampaign).toBeCalledWith(command);
 
     expect(result).toEqual(expectedCampaign);
   });
