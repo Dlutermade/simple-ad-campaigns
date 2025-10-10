@@ -7,13 +7,14 @@ import {
   FindCampaignByIdQuery,
   FindCampaignByIdResult,
 } from '../queries';
+import { CreateCampaignCommand, CreateCampaignResult } from '../commands';
 import {
   CreateCampaignRequest,
+  CreateCampaignResponse,
   GetAllCampaignsRequest,
   GetAllCampaignsResponse,
   GetCampaignByIdResponse,
 } from '../dtos';
-import { CreateCampaignCommand } from '../commands';
 
 @Controller('campaigns')
 export class CampaignController {
@@ -56,11 +57,13 @@ export class CampaignController {
   @ApiResponse({
     status: 201,
     description: 'Campaign created successfully',
-    type: GetCampaignByIdResponse,
+    type: CreateCampaignResponse,
   })
   @Post()
   createCampaign(@Body() body: CreateCampaignRequest) {
     const command = new CreateCampaignCommand(body.name, body.budget);
-    return this.commandBus.execute<CreateCampaignCommand>(command);
+    return this.commandBus.execute<CreateCampaignCommand, CreateCampaignResult>(
+      command,
+    );
   }
 }

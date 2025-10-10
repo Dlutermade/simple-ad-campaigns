@@ -2,10 +2,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateCampaignCommand } from './create-campaign.command';
 import { Logger } from '@nestjs/common';
 import { CampaignRepository } from '../repository/campaign.repository';
+import { CreateCampaignResult } from './create-campaign.result';
 
 @CommandHandler(CreateCampaignCommand)
 export class CreateCampaignHandler
-  implements ICommandHandler<CreateCampaignCommand>
+  implements ICommandHandler<CreateCampaignCommand, CreateCampaignResult>
 {
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
