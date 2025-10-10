@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SwitchCampaignStatusHandler } from './switch-campaign-status.handler';
 import { CampaignRepository } from '../repository/campaign.repository';
 import { SwitchCampaignStatusCommand } from './switch-campaign-status.command';
-import { ConflictException } from '@nestjs/common';
 import { campaignsTable } from '@src/db/schema';
+import { DRIZZLE_PROVIDER } from '@src/libs/drizzle.module';
 
 describe('SwitchCampaignStatusHandler', () => {
   let handler: SwitchCampaignStatusHandler;
@@ -14,8 +14,16 @@ describe('SwitchCampaignStatusHandler', () => {
       providers: [
         SwitchCampaignStatusHandler,
         {
+          provide: DRIZZLE_PROVIDER,
+          useValue: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+            transaction: vitest.fn().mockImplementation((cb) => cb(null)),
+          },
+        },
+        {
           provide: CampaignRepository,
           useValue: {
+            findById: vitest.fn(),
             update: vitest.fn(
               (
                 id: string,
@@ -51,34 +59,28 @@ describe('SwitchCampaignStatusHandler', () => {
     expect(handler).toBeDefined();
   });
 
-  it(`
-GIVEN:
+  it(`GIVEN:
     No campaign with id 1 exists in the database
 WHEN:
     I attempt to switch the campaign status to 'Active'
 THEN:
-    a NotFoundException should be thrown
-  `, async () => {
+    a NotFoundException should be thrown`, async () => {
     vitest.spyOn(repository, 'findById').mockResolvedValue(undefined);
 
     const command = new SwitchCampaignStatusCommand('1', 'Active', 1);
 
-    await expect(handler.execute(command)).rejects.toThrowError(
-      expect.objectContaining({
-        constructor: ConflictException,
-        response: { errorCode: 'CAMPAIGN_NOT_FOUND' },
-      }),
-    );
+    await expect(handler.execute(command)).rejects.toMatchObject({
+      response: { errorCode: 'CAMPAIGN_NOT_FOUND' },
+      name: 'NotFoundException',
+    });
   });
 
-  it(`
-GIVEN:
+  it(`GIVEN:
     a campaign with id 1 and status 'Deleted' exists in the database
 WHEN:
     I attempt to switch the campaign status to 'Active'
 THEN:
-    a ConflictException should be thrown
-  `, async () => {
+    a ConflictException should be thrown`, async () => {
     vitest.spyOn(repository, 'findById').mockResolvedValue({
       id: '1',
       name: 'Test Campaign',
@@ -91,22 +93,18 @@ THEN:
 
     const command = new SwitchCampaignStatusCommand('1', 'Active', 1);
 
-    await expect(handler.execute(command)).rejects.toThrowError(
-      expect.objectContaining({
-        constructor: ConflictException,
-        response: { errorCode: 'CAMPAIGN_DELETED' },
-      }),
-    );
+    await expect(handler.execute(command)).rejects.toMatchObject({
+      response: { errorCode: 'CAMPAIGN_DELETED' },
+      name: 'ConflictException',
+    });
   });
 
-  it(`
-GIVEN:
+  it(`GIVEN:
     a campaign with id 1 and status 'Paused' and version 2 exists in the database
 WHEN:
     I attempt to switch the campaign status to 'Active' with version 1
 THEN:
-    a ConflictException should be thrown
-  `, async () => {
+    a ConflictException should be thrown`, async () => {
     vitest.spyOn(repository, 'findById').mockResolvedValue({
       id: '1',
       name: 'Test Campaign',
@@ -119,22 +117,18 @@ THEN:
 
     const command = new SwitchCampaignStatusCommand('1', 'Active', 1);
 
-    await expect(handler.execute(command)).rejects.toThrowError(
-      expect.objectContaining({
-        constructor: ConflictException,
-        response: { errorCode: 'CAMPAIGN_VERSION_MISMATCH' },
-      }),
-    );
+    await expect(handler.execute(command)).rejects.toMatchObject({
+      response: { errorCode: 'CAMPAIGN_VERSION_MISMATCH' },
+      name: 'ConflictException',
+    });
   });
 
-  it(`
-GIVEN:
+  it(`GIVEN:
     a campaign with id 1 and status 'Paused' exists in the database
 WHEN:
     I attempt to switch the campaign status to 'Paused'
 THEN:
-    a ConflictException should be thrown
-  `, async () => {
+    a ConflictException should be thrown`, async () => {
     vitest.spyOn(repository, 'findById').mockResolvedValue({
       id: '1',
       name: 'Test Campaign',
@@ -147,22 +141,18 @@ THEN:
 
     const command = new SwitchCampaignStatusCommand('1', 'Paused', 1);
 
-    await expect(handler.execute(command)).rejects.toThrowError(
-      expect.objectContaining({
-        constructor: ConflictException,
-        response: { errorCode: 'CAMPAIGN_STATUS_UNCHANGED' },
-      }),
-    );
+    await expect(handler.execute(command)).rejects.toMatchObject({
+      response: { errorCode: 'CAMPAIGN_STATUS_UNCHANGED' },
+      name: 'ConflictException',
+    });
   });
 
-  it(`
-GIVEN:
+  it(`GIVEN:
     a campaign with id 1 and status 'Paused' and version 1 exists in the database
 WHEN:
     I attempt to switch the campaign status to 'Active' with version 1
 THEN:
-    the campaign status should be updated to 'Active'
-  `, async () => {
+    the campaign status should be updated to 'Active'`, async () => {
     vitest.spyOn(repository, 'findById').mockResolvedValue({
       id: '1',
       name: 'Test Campaign',
@@ -177,9 +167,16 @@ THEN:
 
     await handler.execute(command);
 
-    expect(repository.update).toHaveBeenCalledWith('1', {
-      status: 'Active',
-      version: 1,
-    });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(repository.update).toHaveBeenCalledExactlyOnceWith(
+      '1',
+      {
+        status: 'Active',
+        version: 1,
+      },
+      {
+        txClient: null,
+      },
+    );
   });
 });

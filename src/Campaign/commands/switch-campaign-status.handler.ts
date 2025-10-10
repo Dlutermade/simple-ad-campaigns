@@ -42,6 +42,7 @@ export class SwitchCampaignStatusHandler
           },
         })
         .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           if (error?.code === '55P03') {
             this.logger.error(
               'Could not acquire lock on the campaign. It might be being modified by another transaction.',
