@@ -24,7 +24,23 @@ export class FindAllCampaignsHandler
 
       return Promise.all([
         tx.query.campaignsTable.findMany({
-          with: { adSets: { with: { ads: true } } },
+          where(fields, { not, eq }) {
+            return not(eq(fields.status, 'Deleted'));
+          },
+          with: {
+            adSets: {
+              with: {
+                ads: {
+                  where(fields, { not, eq }) {
+                    return not(eq(fields.status, 'Deleted'));
+                  },
+                },
+              },
+              where(fields, { not, eq }) {
+                return not(eq(fields.status, 'Deleted'));
+              },
+            },
+          },
           limit: query.take,
           offset: query.skip,
         }),

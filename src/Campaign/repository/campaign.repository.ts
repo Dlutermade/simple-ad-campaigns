@@ -69,7 +69,7 @@ export class CampaignRepository {
 
       return campaign;
     } catch (error) {
-      this.Logger.error(`Cannot find campaign by id: ${id}`, error);
+      this.Logger.error(`Error finding campaign by id: ${id}`, error);
       throw error;
     }
   }

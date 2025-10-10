@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CampaignRepository } from '../repository/campaign.repository';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
+import { AdSetRepository } from '../repository/ad-set.repository';
 
 @CommandHandler(SwitchCampaignStatusCommand)
 export class SwitchCampaignStatusHandler
@@ -19,6 +20,7 @@ export class SwitchCampaignStatusHandler
     @Inject(DRIZZLE_PROVIDER)
     private readonly db: PgDatabase,
     private readonly campaignRepository: CampaignRepository,
+    private readonly adSetRepository: AdSetRepository,
   ) {}
 
   private readonly logger = new Logger(SwitchCampaignStatusHandler.name);
@@ -98,6 +100,57 @@ export class SwitchCampaignStatusHandler
           id: command.id,
           status: command.status,
         });
+      }
+
+      if (command.status === 'Active') {
+        const adSets = await this.adSetRepository.findManyByCampaignId(
+          command.id,
+          {
+            txClient: tx,
+          },
+        );
+
+        if (adSets.length > 3) {
+          this.logger.error(
+            `Cannot activate campaign with id ${command.id} because it has more than 3 ad sets.`,
+          );
+          throw new ConflictException({
+            errorCode: 'ADSET_LIMIT_EXCEEDED',
+            id: command.id,
+            adSetCount: adSets.length,
+          });
+        }
+
+        const activeAdSets = adSets.filter(
+          (adSet) => adSet.status === 'Active',
+        );
+
+        if (activeAdSets.length === 0) {
+          this.logger.error(
+            `Cannot activate campaign with id ${command.id} because it has no active ad sets.`,
+          );
+          throw new ConflictException({
+            errorCode: 'NO_ACTIVE_ADSETS',
+            id: command.id,
+          });
+        }
+
+        const totalBudgetForActiveAdSets = activeAdSets.reduce(
+          (sum, adSet) => sum + adSet.budget,
+          0,
+        );
+
+        if (totalBudgetForActiveAdSets > campaign.budget) {
+          this.logger.error(
+            `Cannot activate campaign with id ${command.id} because total budget of active ad sets (${totalBudgetForActiveAdSets}) exceeds campaign budget (${campaign.budget}).`,
+          );
+          throw new ConflictException({
+            errorCode: 'CAMPAIGN_BUDGET_EXCEEDED',
+            id: command.id,
+            campaignBudget: campaign.budget,
+            totalAdSetsBudget: totalBudgetForActiveAdSets,
+          });
+        }
       }
 
       return this.campaignRepository.update(

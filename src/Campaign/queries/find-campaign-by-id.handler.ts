@@ -19,8 +19,23 @@ export class FindCampaignByIdHandler
     this.logger.log('Executing FindCampaignByIdQuery', query);
 
     const campaign = await this.db.query.campaignsTable.findFirst({
-      where: (table, { eq }) => eq(table.id, query.id),
-      with: { adSets: { with: { ads: true } } },
+      where(fields, { and, not, eq }) {
+        return and(eq(fields.id, query.id), not(eq(fields.status, 'Deleted')));
+      },
+      with: {
+        adSets: {
+          with: {
+            ads: {
+              where(fields, { not, eq }) {
+                return not(eq(fields.status, 'Deleted'));
+              },
+            },
+          },
+          where(fields, { not, eq }) {
+            return not(eq(fields.status, 'Deleted'));
+          },
+        },
+      },
     });
 
     if (!campaign) {
