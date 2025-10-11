@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { adSetsTable } from '@src/db/schema';
+import { adSetsTable, campaignsTable } from '@src/db/schema';
 import {
   DRIZZLE_PROVIDER,
   PgDatabase,
   PgTransactionClient,
 } from '@src/libs/drizzle.module';
-import { and, eq, not } from 'drizzle-orm';
+import { and, eq, not, sql } from 'drizzle-orm';
 import { LockConfig, LockStrength } from 'drizzle-orm/pg-core';
 
 @Injectable()
@@ -50,6 +50,50 @@ export class AdSetRepository {
     } catch (error) {
       this.Logger.error(
         `Error fetching ad sets for campaign ID: ${campaignId}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async create(
+    data: {
+      campaignId: string;
+      name: string;
+      budget: number;
+    },
+    options?: { txClient?: PgTransactionClient },
+  ) {
+    try {
+      this.Logger.log(`Creating ad set for campaign ID: ${data.campaignId}`);
+      const dbClient = options?.txClient ?? this.db;
+
+      const [adSet] = await dbClient
+        .insert(adSetsTable)
+        .values({
+          campaignId: data.campaignId,
+          name: data.name,
+          budget: data.budget,
+          status: 'Paused',
+        })
+        .returning();
+
+      await dbClient
+        .update(campaignsTable)
+        .set({
+          updatedAt: new Date(),
+          version: sql`${campaignsTable.version} + 1`,
+        })
+        .where(eq(campaignsTable.id, data.campaignId));
+
+      this.Logger.log(
+        `Ad set created with ID: ${adSet.id} for campaign ID: ${data.campaignId}`,
+      );
+
+      return adSet;
+    } catch (error) {
+      this.Logger.error(
+        `Error creating ad set for campaign ID: ${data.campaignId}`,
         error,
       );
       throw error;

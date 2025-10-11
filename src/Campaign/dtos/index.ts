@@ -1,3 +1,6 @@
+/**
+ * Campaign DTOs
+ */
 export * from './adjust-campaign-budget.request';
 export * from './adjust-campaign-budget.response';
 
@@ -14,3 +17,9 @@ export * from './switch-campaign-status.response';
 
 export * from './update-campaign.request';
 export * from './update-campaign.response';
+
+/**
+ * Ad set DTOs
+ */
+export * from './create-ad-set.request';
+export * from './create-ad-set.response';
