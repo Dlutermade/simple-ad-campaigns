@@ -14,7 +14,7 @@ export class CampaignRepository {
 
   private readonly Logger = new Logger(CampaignRepository.name);
 
-  async createCampaign(
+  async create(
     data: Pick<typeof campaignsTable.$inferInsert, 'name' | 'budget'>,
     options?: { txClient?: PgTransactionClient },
   ) {

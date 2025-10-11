@@ -15,7 +15,7 @@ export class CreateCampaignHandler
   async execute(command: CreateCampaignCommand) {
     this.logger.log('Creating a new campaign...', command);
 
-    const campaign = await this.campaignRepository.createCampaign({
+    const campaign = await this.campaignRepository.create({
       name: command.name,
       budget: command.budget,
     });
