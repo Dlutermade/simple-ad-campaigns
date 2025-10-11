@@ -21,6 +21,9 @@ describe('CreateCampaignHandler', () => {
                 name: data.name,
                 budget: data.budget,
                 status: 'Paused',
+                version: 1,
+                createdAt: new Date(),
+                updatedAt: new Date(),
               })),
           },
         },
@@ -46,6 +49,6 @@ describe('CreateCampaignHandler', () => {
 
     const result = await handler.execute(command);
 
-    expect(result).toEqual(expectedCampaign);
+    expect(result).toMatchObject(expectedCampaign);
   });
 });

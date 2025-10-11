@@ -23,3 +23,6 @@ export * from './update-campaign.response';
  */
 export * from './create-ad-set.request';
 export * from './create-ad-set.response';
+
+export * from './update-ad-set.request';
+export * from './update-ad-set.response';

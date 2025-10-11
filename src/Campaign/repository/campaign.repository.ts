@@ -76,10 +76,9 @@ export class CampaignRepository {
 
   async update(
     id: string,
-    data: Pick<typeof campaignsTable.$inferSelect, 'version'> &
-      Partial<
-        Pick<typeof campaignsTable.$inferSelect, 'name' | 'budget' | 'status'>
-      >,
+    data: Partial<
+      Pick<typeof campaignsTable.$inferSelect, 'name' | 'budget' | 'status'>
+    >,
     options?: { txClient?: PgTransactionClient },
   ): Promise<typeof campaignsTable.$inferSelect | undefined> {
     try {
@@ -96,12 +95,7 @@ export class CampaignRepository {
           version: sql`${campaignsTable.version} + 1`,
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(campaignsTable.id, id),
-            eq(campaignsTable.version, data.version),
-          ),
-        )
+        .where(and(eq(campaignsTable.id, id)))
         .returning();
 
       this.Logger.log(`Updated campaign id: ${id}`, campaign);

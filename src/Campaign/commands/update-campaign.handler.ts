@@ -76,7 +76,7 @@ export class UpdateCampaignHandler
 
         const updatedCampaign = await this.campaignRepository.update(
           command.id,
-          { name: command.name, version: campaign.version },
+          { name: command.name },
           { txClient: tx },
         );
         this.logger.log('Campaign updated successfully.', updatedCampaign);

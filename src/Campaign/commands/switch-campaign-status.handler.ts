@@ -158,7 +158,6 @@ export class SwitchCampaignStatusHandler
         command.id,
         {
           status: command.status,
-          version: campaign.version,
         },
         {
           txClient: tx,

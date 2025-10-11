@@ -217,7 +217,6 @@ THEN:
     expect(result).toMatchObject({
       id: '1',
       budget: 1200,
-      version: 2,
     });
   });
 });

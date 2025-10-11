@@ -175,7 +175,6 @@ THEN:
 
     expect(result).toMatchObject({
       name: 'New Campaign Name',
-      version: 2,
     });
   });
 });
