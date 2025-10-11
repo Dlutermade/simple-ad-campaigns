@@ -120,7 +120,7 @@ export class AdjustCampaignBudgetHandler
         command.id,
         {
           budget: adjustedBudget,
-          version: campaign.version + 1,
+          version: campaign.version,
         },
         {
           txClient: tx,

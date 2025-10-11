@@ -6,7 +6,6 @@ import { CreateCampaignCommand } from './create-campaign.command';
 
 describe('CreateCampaignHandler', () => {
   let handler: CreateCampaignHandler;
-  let repository: CampaignRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -15,7 +14,7 @@ describe('CreateCampaignHandler', () => {
         {
           provide: CampaignRepository,
           useValue: {
-            createCampaign: vitest
+            create: vitest
               .fn()
               .mockImplementation((data: { name: string; budget: number }) => ({
                 id: '1',
@@ -29,7 +28,6 @@ describe('CreateCampaignHandler', () => {
     }).compile();
 
     handler = module.get<CreateCampaignHandler>(CreateCampaignHandler);
-    repository = module.get<CampaignRepository>(CampaignRepository);
   });
 
   it('should be defined', () => {

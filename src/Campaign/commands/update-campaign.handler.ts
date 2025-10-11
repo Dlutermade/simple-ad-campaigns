@@ -3,7 +3,6 @@ import {
   Inject,
   Logger,
   NotFoundException,
-  NotImplementedException,
 } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';

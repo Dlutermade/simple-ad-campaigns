@@ -162,6 +162,7 @@ AND:
     2 | 1          | Ad Set 2 | 300    | Paused
     3 | 1          | Ad Set 2 | 100    | Active
     4 | 1          | Ad Set 2 | 100    | Active
+    5 | 1          | Ad Set 2 | 100    | Active
 WHEN:
     I attempt to switch the campaign status to 'Active' with version 1
 THEN:
@@ -180,7 +181,7 @@ THEN:
         id: '1',
         campaignId: '1',
         name: 'Ad Set 1',
-        budget: 500,
+        budget: 100,
         status: 'Active',
       },
       {
@@ -194,7 +195,21 @@ THEN:
         id: '3',
         campaignId: '1',
         name: 'Ad Set 3',
-        budget: 1000,
+        budget: 100,
+        status: 'Active',
+      },
+      {
+        id: '4',
+        campaignId: '1',
+        name: 'Ad Set 4',
+        budget: 100,
+        status: 'Active',
+      },
+      {
+        id: '5',
+        campaignId: '1',
+        name: 'Ad Set 5',
+        budget: 100,
         status: 'Active',
       },
     ]);

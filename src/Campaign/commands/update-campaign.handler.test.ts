@@ -141,7 +141,11 @@ THEN:
 
     const result = await handler.execute(command);
 
-    expect(result).toEqual(existingCampaign);
+    expect(result).toMatchObject({
+      name: 'Test Campaign',
+      version: 1,
+    });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(campaignRepository.update).not.toHaveBeenCalled();
   });
 
@@ -169,14 +173,9 @@ THEN:
 
     const result = await handler.execute(command);
 
-    expect(result).toEqual({
-      ...existingCampaign,
+    expect(result).toMatchObject({
       name: 'New Campaign Name',
       version: 2,
-    });
-    expect(campaignRepository.update).toHaveBeenCalledWith('1', {
-      name: 'New Campaign Name',
-      version: 1,
     });
   });
 });

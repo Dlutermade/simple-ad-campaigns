@@ -77,8 +77,8 @@ THEN:
     const command = new AdjustCampaignBudgetCommand('1', 2000, 1);
 
     await expect(handler.execute(command)).rejects.toMatchObject({
-      errorCode: 'CAMPAIGN_NOT_FOUND',
-      name: 'ConflictException',
+      response: { errorCode: 'CAMPAIGN_NOT_FOUND' },
+      name: 'NotFoundException',
     });
   });
 
@@ -105,7 +105,7 @@ THEN:
     );
 
     await expect(handler.execute(command)).rejects.toMatchObject({
-      errorCode: 'CAMPAIGN_DELETED',
+      response: { errorCode: 'CAMPAIGN_DELETED' },
       name: 'ConflictException',
     });
   });
@@ -129,7 +129,7 @@ THEN:
     const command = new AdjustCampaignBudgetCommand('1', 2000, 1);
 
     await expect(handler.execute(command)).rejects.toMatchObject({
-      errorCode: 'CAMPAIGN_VERSION_MISMATCH',
+      response: { errorCode: 'CAMPAIGN_VERSION_MISMATCH' },
       name: 'ConflictException',
     });
   });
@@ -170,7 +170,9 @@ THEN:
     const command = new AdjustCampaignBudgetCommand('1', -200, 1);
 
     await expect(handler.execute(command)).rejects.toMatchObject({
-      errorCode: 'CAMPAIGN_BUDGET_LESS_THAN_ACTIVE_ADSETS_TOTAL_BUDGET',
+      response: {
+        errorCode: 'CAMPAIGN_BUDGET_LESS_THAN_ACTIVE_ADSETS_TOTAL_BUDGET',
+      },
       name: 'ConflictException',
     });
   });
