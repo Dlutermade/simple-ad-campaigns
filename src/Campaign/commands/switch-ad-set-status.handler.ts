@@ -124,6 +124,34 @@ export class SwitchAdSetStatusHandler
             adSetId: command.adSetId,
           });
         }
+
+        const adSetsForCampaign =
+          await this.adSetRepository.findManyByCampaignId(command.campaignId, {
+            txClient: tx,
+          });
+
+        const activeAdSets = adSetsForCampaign.filter(
+          (set) => set.status === 'Active',
+        );
+
+        const totalBudgetOfActiveAdSets = activeAdSets.reduce(
+          (sum, set) => sum + set.budget,
+          0,
+        );
+
+        if (totalBudgetOfActiveAdSets + adSet.budget > campaign.budget) {
+          this.logger.error(
+            `Cannot activate Ad Set with ID ${command.adSetId} because activating it would exceed the Campaign's budget.`,
+          );
+          throw new ConflictException({
+            errorCode: 'AD_SET_ACTIVATION_EXCEEDS_CAMPAIGN_BUDGET',
+            adSetId: command.adSetId,
+            campaignId: command.campaignId,
+            campaignBudget: campaign.budget,
+            totalActiveAdSetsBudget: totalBudgetOfActiveAdSets,
+            adSetBudget: adSet.budget,
+          });
+        }
       }
 
       if (campaign.status === 'Active' && command.status === 'Paused') {

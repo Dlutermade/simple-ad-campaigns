@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CampaignRepository } from '../repository/campaign.repository';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
-import { MAX_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
+import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
 
 @CommandHandler(CreateAdSetCommand)
 export class CreateAdSetHandler
@@ -50,7 +50,7 @@ export class CreateAdSetHandler
         { txClient: tx },
       );
 
-      if (existingAdSets.length >= MAX_AD_SETS_PER_CAMPAIGN) {
+      if (existingAdSets.length >= MAXIMUM_AD_SETS_PER_CAMPAIGN) {
         this.logger.error(
           `Campaign with ID ${command.campaignId} already has maximum number of ad sets.`,
         );
@@ -58,7 +58,7 @@ export class CreateAdSetHandler
           errorCode: 'MAX_AD_SETS_REACHED',
           campaignId: command.campaignId,
           adSetCount: existingAdSets.length,
-          maximumAllowed: MAX_AD_SETS_PER_CAMPAIGN,
+          maximumAllowed: MAXIMUM_AD_SETS_PER_CAMPAIGN,
         });
       }
 

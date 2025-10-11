@@ -249,4 +249,48 @@ THEN:
       name: 'ConflictException',
     });
   });
+
+  it('should throw ConflictException when switching ad set status to Active in an Active campaign Budget exceeded', async () => {
+    vitest.spyOn(adSetRepository, 'findById').mockResolvedValue({
+      id: '1',
+      campaignId: '1',
+      name: 'Test Ad Set',
+      budget: 500,
+      status: 'Paused',
+    });
+    vitest.spyOn(campaignRepository, 'findById').mockResolvedValue({
+      id: '1',
+      name: 'Test Campaign',
+      budget: 600,
+      status: 'Active',
+      version: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vitest.spyOn(adSetRepository, 'findManyByCampaignId').mockResolvedValue([
+      {
+        id: '2',
+        campaignId: '1',
+        name: 'Another Ad Set',
+        budget: 200,
+        status: 'Active',
+      },
+    ]);
+    vitest.spyOn(adRepository, 'findManyByAdSetId').mockResolvedValue([
+      {
+        id: 'ad1',
+        adSetId: '1',
+        name: 'Ad 1',
+        content: 'Ad Content 1',
+        creative: 'http://example.com/ad1',
+        status: 'Active',
+      },
+    ]);
+
+    const command = new SwitchAdSetStatusCommand('1', '1', 'Active', 1);
+    await expect(handler.execute(command)).rejects.toMatchObject({
+      response: { errorCode: 'AD_SET_ACTIVATION_EXCEEDS_CAMPAIGN_BUDGET' },
+      name: 'ConflictException',
+    });
+  });
 });

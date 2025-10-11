@@ -10,7 +10,7 @@ import {
 import { CampaignRepository } from '../repository/campaign.repository';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import { AdSetRepository } from '../repository/ad-set.repository';
-import { MAX_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
+import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
 
 @CommandHandler(SwitchCampaignStatusCommand)
 export class SwitchCampaignStatusHandler
@@ -111,7 +111,7 @@ export class SwitchCampaignStatusHandler
           },
         );
 
-        if (adSets.length > MAX_AD_SETS_PER_CAMPAIGN) {
+        if (adSets.length > MAXIMUM_AD_SETS_PER_CAMPAIGN) {
           this.logger.error(
             `Cannot activate campaign with id ${command.id} because it has more than 3 ad sets.`,
           );
