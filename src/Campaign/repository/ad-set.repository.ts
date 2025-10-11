@@ -143,7 +143,7 @@ export class AdSetRepository {
 
   async update(
     adSetId: string,
-    data: { name: string },
+    data: Partial<Pick<typeof adSetsTable.$inferInsert, 'name' | 'status'>>,
     options?: { txClient?: PgTransactionClient },
   ) {
     try {

@@ -3,14 +3,14 @@ import { ApiProperty } from '@nestjs/swagger';
 export class SwitchCampaignStatusResponse {
   @ApiProperty({
     type: String,
-    description: 'ID of the created campaign',
+    description: 'ID of the updated campaign',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   public readonly id: string;
 
   @ApiProperty({
     type: String,
-    description: 'Name of the created campaign',
+    description: 'Name of the updated campaign',
     example: 'Summer Sale Campaign',
   })
   public readonly name: string;

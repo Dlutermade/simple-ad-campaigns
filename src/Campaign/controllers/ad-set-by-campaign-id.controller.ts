@@ -1,15 +1,19 @@
-import { Body, Controller, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, Put } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateAdSetRequest,
   CreateAdSetResponse,
+  SwitchAdSetStatusRequest,
+  SwitchAdSetStatusResponse,
   UpdateAdSetRequest,
   UpdateAdSetResponse,
 } from '../dtos';
 import {
   CreateAdSetCommand,
   CreateAdSetResult,
+  SwitchAdSetStatusCommand,
+  SwitchAdSetStatusResult,
   UpdateAdSetCommand,
   UpdateAdSetResult,
 } from '../commands';
@@ -55,5 +59,28 @@ export class AdSetByCampaignIdController {
     return this.commandBus.execute<UpdateAdSetCommand, UpdateAdSetResult>(
       command,
     );
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Ad Set updated successfully',
+    type: SwitchAdSetStatusResponse,
+  })
+  @Patch(':adSetId/status')
+  switchAdSetStatus(
+    @Param('campaignId') campaignId: string,
+    @Param('adSetId') adSetId: string,
+    @Body() body: SwitchAdSetStatusRequest,
+  ) {
+    const command = new SwitchAdSetStatusCommand(
+      campaignId,
+      adSetId,
+      body.status,
+      body.version,
+    );
+    return this.commandBus.execute<
+      SwitchAdSetStatusCommand,
+      SwitchAdSetStatusResult
+    >(command);
   }
 }

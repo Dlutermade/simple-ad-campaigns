@@ -39,7 +39,7 @@ describe('UpdateAdSetHandler', () => {
             update: vitest
               .fn()
               .mockImplementation(
-                (adSetId: string, data: { name: string; version: number }) => ({
+                (adSetId: string, data: { name: string }) => ({
                   id: adSetId,
                   campaignId: '1',
                   name: data.name,
@@ -53,7 +53,6 @@ describe('UpdateAdSetHandler', () => {
               name: 'Test Ad Set',
               budget: 500,
               status: 'Paused',
-              version: 1,
             }),
           },
         },
@@ -104,6 +103,20 @@ describe('UpdateAdSetHandler', () => {
         errorCode: 'CAMPAIGN_VERSION_MISMATCH',
         campaignId: '1',
       },
+    });
+  });
+
+  it('should update ad set successfully', async () => {
+    const command = new UpdateAdSetCommand('1', '1', 'Updated Ad Set', 1);
+
+    const result = await handler.execute(command);
+
+    expect(result).toEqual({
+      id: '1',
+      campaignId: '1',
+      name: 'Updated Ad Set',
+      budget: 500,
+      status: 'Paused',
     });
   });
 });

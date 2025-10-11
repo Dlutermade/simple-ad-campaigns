@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 
-export class SwitchCampaignStatusRequest {
+export class SwitchAdSetStatusRequest {
   @ApiProperty({
     type: String,
     enum: ['Active', 'Paused'],
-    description: 'New status for the campaign',
+    description: 'New status for the ad set',
     example: 'Active',
   })
   @IsEnum(['Active', 'Paused'])

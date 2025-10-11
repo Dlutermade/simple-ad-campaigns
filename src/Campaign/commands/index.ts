@@ -1,6 +1,7 @@
 import { AdjustCampaignBudgetHandler } from './adjust-campaign-budget.handler';
 import { CreateAdSetHandler } from './create-ad-set.handler';
 import { CreateCampaignHandler } from './create-campaign.handler';
+import { SwitchAdSetStatusHandler } from './switch-ad-set-status.handler';
 import { SwitchCampaignStatusHandler } from './switch-campaign-status.handler';
 import { UpdateAdSetHandler } from './update-ad-set.handler';
 import { UpdateCampaignHandler } from './update-campaign.handler';
@@ -27,6 +28,9 @@ export * from './update-campaign.result';
 export * from './create-ad-set.command';
 export * from './create-ad-set.result';
 
+export * from './switch-ad-set-status.command';
+export * from './switch-ad-set-status.result';
+
 export * from './update-ad-set.command';
 export * from './update-ad-set.result';
 
@@ -38,5 +42,6 @@ export const commandHandlers = [
   UpdateCampaignHandler,
   // AdSet Handlers
   CreateAdSetHandler,
+  SwitchAdSetStatusHandler,
   UpdateAdSetHandler,
 ];
