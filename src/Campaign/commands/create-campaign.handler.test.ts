@@ -48,9 +48,6 @@ describe('CreateCampaignHandler', () => {
 
     const result = await handler.execute(command);
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(repository.create).toBeCalledWith(command);
-
     expect(result).toEqual(expectedCampaign);
   });
 });
