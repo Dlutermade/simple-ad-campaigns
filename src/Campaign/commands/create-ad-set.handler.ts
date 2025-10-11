@@ -57,7 +57,8 @@ export class CreateAdSetHandler
         throw new ConflictException({
           errorCode: 'MAX_AD_SETS_REACHED',
           campaignId: command.campaignId,
-          maxAdSets: MAX_AD_SETS_PER_CAMPAIGN,
+          adSetCount: existingAdSets.length,
+          maximumAllowed: MAX_AD_SETS_PER_CAMPAIGN,
         });
       }
 
