@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiNotFoundResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   FindAllCampaignsQuery,
   FindAllCampaignsResult,
@@ -39,6 +39,7 @@ import {
   UpdateCampaignResponse,
 } from '../dtos';
 
+@ApiTags('Campaigns')
 @Controller('campaigns')
 export class CampaignController {
   constructor(
