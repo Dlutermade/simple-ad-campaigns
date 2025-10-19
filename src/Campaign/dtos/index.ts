@@ -24,6 +24,8 @@ export * from './update-campaign.response';
 export * from './create-ad-set.request';
 export * from './create-ad-set.response';
 
+export * from './delete-ad-set.request';
+
 export * from './switch-ad-set-status.request';
 export * from './switch-ad-set-status.response';
 

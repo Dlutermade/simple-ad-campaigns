@@ -28,6 +28,8 @@ export * from './update-campaign.result';
 export * from './create-ad-set.command';
 export * from './create-ad-set.result';
 
+export * from './delete-ad-set.command';
+
 export * from './switch-ad-set-status.command';
 export * from './switch-ad-set-status.result';
 
