@@ -8,7 +8,7 @@ export class CreateAdSetRequest {
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  public readonly name: string;
 
   @ApiProperty({
     description: 'Budget for the ad set in cents',
@@ -18,5 +18,13 @@ export class CreateAdSetRequest {
   @IsInt()
   @IsNotEmpty()
   @Min(0)
-  budget: number;
+  public readonly budget: number;
+
+  @ApiProperty({
+    description: 'Version number for optimistic concurrency control',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  public readonly version: number;
 }

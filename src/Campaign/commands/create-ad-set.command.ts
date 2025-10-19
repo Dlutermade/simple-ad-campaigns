@@ -5,5 +5,6 @@ export class CreateAdSetCommand implements ICommand {
     public readonly campaignId: string,
     public readonly name: string,
     public readonly budget: number,
+    public readonly version: number,
   ) {}
 }

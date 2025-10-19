@@ -33,7 +33,12 @@ export class AdSetByCampaignIdController {
     @Param('campaignId') campaignId: string,
     @Body() body: CreateAdSetRequest,
   ) {
-    const command = new CreateAdSetCommand(campaignId, body.name, body.budget);
+    const command = new CreateAdSetCommand(
+      campaignId,
+      body.name,
+      body.budget,
+      body.version,
+    );
     return this.commandBus.execute<CreateAdSetCommand, CreateAdSetResult>(
       command,
     );

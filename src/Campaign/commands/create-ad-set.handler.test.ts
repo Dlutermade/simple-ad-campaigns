@@ -69,7 +69,7 @@ describe('CreateAdSetHandler', () => {
   });
 
   it('should create an ad set', async () => {
-    const command = new CreateAdSetCommand('1', 'Test Ad Set', 500);
+    const command = new CreateAdSetCommand('1', 'Test Ad Set', 500, 1);
 
     const expectedAdSet = {
       id: '1',
@@ -89,7 +89,7 @@ describe('CreateAdSetHandler', () => {
       .spyOn(campaignRepository, 'findById')
       .mockResolvedValueOnce(undefined);
 
-    const command = new CreateAdSetCommand('999', 'Test Ad Set', 500);
+    const command = new CreateAdSetCommand('999', 'Test Ad Set', 500, 1);
 
     await expect(handler.execute(command)).rejects.toMatchObject({
       response: {
@@ -110,7 +110,7 @@ describe('CreateAdSetHandler', () => {
       })),
     );
 
-    const command = new CreateAdSetCommand('1', 'Test Ad Set', 500);
+    const command = new CreateAdSetCommand('1', 'Test Ad Set', 500, 1);
 
     await expect(handler.execute(command)).rejects.toMatchObject({
       response: {
@@ -123,7 +123,7 @@ describe('CreateAdSetHandler', () => {
   });
 
   it('should create an ad set successfully', async () => {
-    const command = new CreateAdSetCommand('1', 'New Ad Set', 300);
+    const command = new CreateAdSetCommand('1', 'New Ad Set', 300, 1);
 
     const result = await handler.execute(command);
 

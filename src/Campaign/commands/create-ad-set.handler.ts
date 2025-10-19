@@ -45,6 +45,18 @@ export class CreateAdSetHandler
         });
       }
 
+      if (campaign.version !== command.version) {
+        this.logger.error(
+          `Campaign version mismatch for ID ${command.campaignId}. Expected ${campaign.version}, got ${command.version}.`,
+        );
+        throw new ConflictException({
+          errorCode: 'CAMPAIGN_VERSION_MISMATCH',
+          campaignId: command.campaignId,
+          expectedVersion: campaign.version,
+          actualVersion: command.version,
+        });
+      }
+
       const existingAdSets = await this.adSetRepository.findManyByCampaignId(
         command.campaignId,
         { txClient: tx },
