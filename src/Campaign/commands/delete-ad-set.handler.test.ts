@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { TestingModule, Test } from '@nestjs/testing';
 import { DRIZZLE_PROVIDER } from '@src/libs/drizzle.module';
 import { AdSetRepository } from '../repository/ad-set.repository';
@@ -77,15 +78,15 @@ describe('DeleteAdSetHandler', () => {
 
     await handler.execute(command);
 
-    expect(campaignRepository.findById).toHaveBeenCalledWith('1', {
+    expect(campaignRepository.findById).toHaveBeenCalledExactlyOnceWith('1', {
       lock: { strength: 'update' },
       txClient: null,
     });
-    expect(adSetRepository.findById).toHaveBeenCalledWith('1', {
+    expect(adSetRepository.findById).toHaveBeenCalledExactlyOnceWith('1', {
       lock: { strength: 'update' },
       txClient: null,
     });
-    expect(adSetRepository.update).toHaveBeenCalledWith(
+    expect(adSetRepository.update).toHaveBeenCalledExactlyOnceWith(
       '1',
       {
         status: 'Deleted',
@@ -111,7 +112,7 @@ describe('DeleteAdSetHandler', () => {
 
     await handler.execute(command);
 
-    expect(adSetRepository.update).toHaveBeenCalledWith(
+    expect(adSetRepository.update).toHaveBeenCalledExactlyOnceWith(
       '1',
       {
         status: 'Deleted',
