@@ -1,9 +1,18 @@
-import { Body, Controller, Param, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateAdSetRequest,
   CreateAdSetResponse,
+  DeleteAdSetRequest,
   SwitchAdSetStatusRequest,
   SwitchAdSetStatusResponse,
   UpdateAdSetRequest,
@@ -12,6 +21,7 @@ import {
 import {
   CreateAdSetCommand,
   CreateAdSetResult,
+  DeleteAdSetCommand,
   SwitchAdSetStatusCommand,
   SwitchAdSetStatusResult,
   UpdateAdSetCommand,
@@ -87,5 +97,19 @@ export class AdSetByCampaignIdController {
       SwitchAdSetStatusCommand,
       SwitchAdSetStatusResult
     >(command);
+  }
+
+  @Delete(':adSetId')
+  @ApiResponse({
+    status: 200,
+    description: 'Ad Set deleted successfully',
+  })
+  deleteAdSet(
+    @Param('campaignId') campaignId: string,
+    @Param('adSetId') adSetId: string,
+    @Body() body: DeleteAdSetRequest,
+  ) {
+    const command = new DeleteAdSetCommand(campaignId, adSetId, body.version);
+    return this.commandBus.execute<DeleteAdSetCommand, void>(command);
   }
 }
