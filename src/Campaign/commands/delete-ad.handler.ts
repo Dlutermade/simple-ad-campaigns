@@ -1,31 +1,30 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DeleteAdSetCommand } from './delete-ad-set.command';
-import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import {
   ConflictException,
   Inject,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import { AdSetRepository } from '../repository/ad-set.repository';
+import { AdRepository } from '../repository/ad.repository';
 import { CampaignRepository } from '../repository/campaign.repository';
+import { DeleteAdCommand } from './delete-ad.command';
 
-@CommandHandler(DeleteAdSetCommand)
-export class DeleteAdSetHandler
-  implements ICommandHandler<DeleteAdSetCommand, void>
-{
+@CommandHandler(DeleteAdCommand)
+export class DeleteAdHandler implements ICommandHandler<DeleteAdCommand, void> {
   constructor(
     @Inject(DRIZZLE_PROVIDER)
     private readonly db: PgDatabase,
     private readonly campaignRepository: CampaignRepository,
     private readonly adSetRepository: AdSetRepository,
+    private readonly adRepository: AdRepository,
   ) {}
 
-  private readonly logger = new Logger(DeleteAdSetHandler.name);
+  private readonly logger = new Logger(DeleteAdHandler.name);
 
-  async execute(command: DeleteAdSetCommand): Promise<void> {
-    this.logger.log('Deleting ad set...', command);
-
+  async execute(command: DeleteAdCommand): Promise<void> {
+    this.logger.log('Deleting ad...', command);
     await this.db.transaction(async (tx) => {
       const campaign = await this.campaignRepository.findById(
         command.campaignId,
@@ -76,6 +75,14 @@ export class DeleteAdSetHandler
         });
       }
 
+      if (adSet.status === 'Deleted') {
+        this.logger.error(`Ad set with ID ${command.adSetId} is deleted.`);
+        throw new ConflictException({
+          errorCode: 'AD_SET_DELETED',
+          adSetId: command.adSetId,
+        });
+      }
+
       if (adSet.campaignId !== command.campaignId) {
         this.logger.error(
           `Ad set with ID ${command.adSetId} does not belong to campaign ID ${command.campaignId}.`,
@@ -87,45 +94,72 @@ export class DeleteAdSetHandler
         });
       }
 
-      if (adSet.status === 'Deleted') {
+      const ad = await this.adRepository.findById(command.adId, {
+        txClient: tx,
+        lock: { strength: 'update' },
+      });
+
+      if (!ad) {
+        this.logger.error(`Ad with ID ${command.adId} not found.`);
+        throw new NotFoundException({
+          errorCode: 'AD_NOT_FOUND',
+          adId: command.adId,
+        });
+      }
+
+      if (ad.status === 'Deleted') {
+        this.logger.error(`Ad with ID ${command.adId} is deleted.`);
+        throw new ConflictException({
+          errorCode: 'AD_DELETED',
+          adId: command.adId,
+        });
+      }
+
+      if (ad.adSetId !== command.adSetId) {
         this.logger.error(
-          `Ad set with ID ${command.adSetId} is already deleted.`,
+          `Ad with ID ${command.adId} does not belong to ad set ID ${command.adSetId}.`,
         );
         throw new ConflictException({
-          errorCode: 'AD_SET_ALREADY_DELETED',
+          errorCode: 'AD_AD_SET_MISMATCH',
+          adId: command.adId,
           adSetId: command.adSetId,
         });
       }
 
-      if (campaign.status === 'Active' && adSet.status === 'Active') {
-        const otherAdSets = await this.adSetRepository.findManyByCampaignId(
-          command.campaignId,
+      if (adSet.status === 'Active' && ad.status === 'Active') {
+        const adsOfAdSet = await this.adRepository.findManyByAdSetId(
+          command.adSetId,
           {
             txClient: tx,
+            lock: { strength: 'update' },
           },
         );
 
-        const activeAdSetsExcludingCurrent = otherAdSets.filter(
-          (set) => set.id !== command.adSetId && set.status === 'Active',
+        const otherActiveAds = adsOfAdSet.filter(
+          (a) => a.id !== command.adId && a.status === 'Active',
         );
 
-        if (activeAdSetsExcludingCurrent.length === 0) {
+        if (otherActiveAds.length === 0) {
           this.logger.error(
-            `Cannot delete the only active ad set in an active campaign (Campaign ID: ${command.campaignId}).`,
+            `Cannot delete the only active ad in an active ad set. AdSet ID: ${command.adSetId}, Ad ID: ${command.adId}`,
           );
           throw new ConflictException({
-            errorCode: 'CANNOT_DELETE_ONLY_ACTIVE_AD_SET',
-            campaignId: command.campaignId,
+            errorCode: 'CANNOT_DELETE_ONLY_ACTIVE_AD',
+            adId: command.adId,
             adSetId: command.adSetId,
           });
         }
       }
 
-      await this.adSetRepository.update(
-        command.adSetId,
-        { status: 'Deleted' },
+      return this.adRepository.update(
+        command.adId,
+        {
+          status: 'Deleted',
+        },
         { txClient: tx },
       );
     });
+
+    this.logger.log(`Ad with ID ${command.adId} deleted successfully.`);
   }
 }

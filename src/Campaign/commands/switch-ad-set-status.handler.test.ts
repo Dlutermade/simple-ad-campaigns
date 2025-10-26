@@ -113,8 +113,8 @@ THEN:
 
     const command = new SwitchAdSetStatusCommand('1', '1', 'Active', 1);
     await expect(handler.execute(command)).rejects.toMatchObject({
-      response: { errorCode: 'AD_SET_NOT_FOUND' },
-      name: 'NotFoundException',
+      response: { errorCode: 'AD_SET_DELETED' },
+      name: 'ConflictException',
     });
   });
 

@@ -1,32 +1,33 @@
 import {
-  ConflictException,
   Inject,
   Logger,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import { AdSetRepository } from '../repository/ad-set.repository';
+import { AdRepository } from '../repository/ad.repository';
 import { CampaignRepository } from '../repository/campaign.repository';
-import { UpdateAdSetResult } from './update-ad-set.result';
-import { UpdateAdSetCommand } from './update-ad-set.command';
+import { UpdateAdCommand } from './update-ad.command';
+import { UpdateAdResult } from './update-ad.result';
 
-@CommandHandler(UpdateAdSetCommand)
-export class UpdateAdSetHandler
-  implements ICommandHandler<UpdateAdSetCommand, UpdateAdSetResult>
+@CommandHandler(UpdateAdCommand)
+export class UpdateAdHandler
+  implements ICommandHandler<UpdateAdCommand, UpdateAdResult>
 {
   constructor(
     @Inject(DRIZZLE_PROVIDER)
     private readonly db: PgDatabase,
     private readonly campaignRepository: CampaignRepository,
     private readonly adSetRepository: AdSetRepository,
+    private readonly adRepository: AdRepository,
   ) {}
 
-  private readonly logger = new Logger(UpdateAdSetHandler.name);
+  private readonly logger = new Logger(UpdateAdHandler.name);
 
-  async execute(command: UpdateAdSetCommand) {
-    this.logger.log('Updating ad set...', command);
-
+  async execute(command: UpdateAdCommand): Promise<UpdateAdResult> {
+    this.logger.log('Updating ad...', command);
     const result = await this.db.transaction(async (tx) => {
       const campaign = await this.campaignRepository.findById(
         command.campaignId,
@@ -54,17 +55,18 @@ export class UpdateAdSetHandler
 
       if (campaign.version !== command.version) {
         this.logger.error(
-          `Campaign with ID ${command.campaignId} has a version conflict.`,
+          `Campaign version mismatch for ID ${command.campaignId}. Expected ${campaign.version}, got ${command.version}.`,
         );
         throw new ConflictException({
           errorCode: 'CAMPAIGN_VERSION_MISMATCH',
           campaignId: command.campaignId,
-          currentVersion: campaign.version,
+          expectedVersion: campaign.version,
         });
       }
 
       const adSet = await this.adSetRepository.findById(command.adSetId, {
         txClient: tx,
+        lock: { strength: 'update' },
       });
 
       if (!adSet) {
@@ -94,21 +96,59 @@ export class UpdateAdSetHandler
         });
       }
 
-      if (adSet.name === command.name) {
-        this.logger.log(
-          `Ad Set with ID ${command.adSetId} has no changes to update.`,
-        );
-        return adSet;
+      const ad = await this.adRepository.findById(command.adId, {
+        txClient: tx,
+        lock: { strength: 'update' },
+      });
+
+      if (!ad) {
+        this.logger.error(`Ad with ID ${command.adId} not found.`);
+        throw new NotFoundException({
+          errorCode: 'AD_NOT_FOUND',
+          adId: command.adId,
+        });
       }
 
-      return this.adSetRepository.update(
-        command.adSetId,
-        { name: command.name },
+      if (ad.adSetId !== command.adSetId) {
+        this.logger.error(
+          `Ad with ID ${command.adId} does not belong to Ad Set with ID ${command.adSetId}.`,
+        );
+        throw new ConflictException({
+          errorCode: 'AD_AD_SET_MISMATCH',
+          adId: command.adId,
+          adSetId: command.adSetId,
+        });
+      }
+
+      if (ad.status === 'Deleted') {
+        this.logger.error(`Ad with ID ${command.adId} is deleted.`);
+        throw new ConflictException({
+          errorCode: 'AD_DELETED',
+          adId: command.adId,
+        });
+      }
+
+      if (
+        ad.name === command.name &&
+        ad.content === command.content &&
+        ad.creative === command.creative
+      ) {
+        this.logger.log(`No changes detected for Ad with ID ${command.adId}.`);
+        return ad;
+      }
+
+      return this.adRepository.update(
+        command.adId,
+        {
+          name: command.name,
+          content: command.content,
+          creative: command.creative,
+        },
         { txClient: tx },
       );
     });
 
-    this.logger.log('Ad set updated successfully.', result);
+    this.logger.log('Ad updated successfully.', result);
     return result;
   }
 }

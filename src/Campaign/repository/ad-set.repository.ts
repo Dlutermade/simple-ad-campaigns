@@ -73,12 +73,7 @@ export class AdSetRepository {
       const sql = dbClient
         .select()
         .from(adSetsTable)
-        .where(
-          and(
-            eq(adSetsTable.id, adSetId),
-            not(eq(adSetsTable.status, 'Deleted')),
-          ),
-        );
+        .where(eq(adSetsTable.id, adSetId));
 
       const [adSet] = await (options?.lock
         ? sql.for(options.lock.strength, options.lock.lockConfig)
@@ -98,11 +93,10 @@ export class AdSetRepository {
   }
 
   async create(
-    data: {
-      campaignId: string;
-      name: string;
-      budget: number;
-    },
+    data: Pick<
+      typeof adSetsTable.$inferInsert,
+      'name' | 'campaignId' | 'budget'
+    >,
     options?: { txClient?: PgTransactionClient },
   ) {
     try {
@@ -154,6 +148,7 @@ export class AdSetRepository {
         .update(adSetsTable)
         .set({
           name: data.name,
+          status: data.status,
         })
         .where(eq(adSetsTable.id, adSetId))
         .returning();

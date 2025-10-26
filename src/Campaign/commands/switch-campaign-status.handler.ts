@@ -10,7 +10,7 @@ import {
 import { CampaignRepository } from '../repository/campaign.repository';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
 import { AdSetRepository } from '../repository/ad-set.repository';
-import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
+import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constants';
 
 @CommandHandler(SwitchCampaignStatusCommand)
 export class SwitchCampaignStatusHandler

@@ -5,7 +5,7 @@ import { AdSetRepository } from '../repository/ad-set.repository';
 import { CreateAdSetCommand } from './create-ad-set.command';
 import { CampaignRepository } from '../repository/campaign.repository';
 import { DRIZZLE_PROVIDER } from '@src/libs/drizzle.module';
-import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
+import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constants';
 
 describe('CreateAdSetHandler', () => {
   let handler: CreateAdSetHandler;

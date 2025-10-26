@@ -31,3 +31,17 @@ export * from './switch-ad-set-status.response';
 
 export * from './update-ad-set.request';
 export * from './update-ad-set.response';
+
+/**
+ * Ad DTOs
+ */
+export * from './create-ad.request';
+export * from './create-ad.response';
+
+export * from './delete-ad.request';
+
+export * from './switch-ad-status.request';
+export * from './switch-ad-status.response';
+
+export * from './update-ad.request';
+export * from './update-ad.response';

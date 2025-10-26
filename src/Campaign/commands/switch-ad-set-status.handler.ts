@@ -83,10 +83,10 @@ export class SwitchAdSetStatusHandler
 
       if (adSet.status === 'Deleted') {
         this.logger.error(
-          `Cannot switch status of Ad Set with ID ${command.adSetId} because it is deleted.`,
+          `Cannot switch status of deleted Ad Set with ID ${command.adSetId}.`,
         );
-        throw new NotFoundException({
-          errorCode: 'AD_SET_NOT_FOUND',
+        throw new ConflictException({
+          errorCode: 'AD_SET_DELETED',
           adSetId: command.adSetId,
         });
       }

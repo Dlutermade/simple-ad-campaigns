@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CampaignRepository } from '../repository/campaign.repository';
 import { DRIZZLE_PROVIDER, PgDatabase } from '@src/libs/drizzle.module';
-import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constnts';
+import { MAXIMUM_AD_SETS_PER_CAMPAIGN } from '@src/constants/ad-set.constants';
 
 @CommandHandler(CreateAdSetCommand)
 export class CreateAdSetHandler
@@ -41,6 +41,14 @@ export class CreateAdSetHandler
         this.logger.error(`Campaign with ID ${command.campaignId} not found.`);
         throw new NotFoundException({
           errorCode: 'CAMPAIGN_NOT_FOUND',
+          campaignId: command.campaignId,
+        });
+      }
+
+      if (campaign.status === 'Deleted') {
+        this.logger.error(`Campaign with ID ${command.campaignId} is deleted.`);
+        throw new ConflictException({
+          errorCode: 'CAMPAIGN_DELETED',
           campaignId: command.campaignId,
         });
       }
